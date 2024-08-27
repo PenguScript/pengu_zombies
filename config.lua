@@ -1,15 +1,15 @@
 Config = {}
 
-Config.ChanceForLootableSpawn = 25
-Config.PurgeDistance = 150.0
+Config.ChanceForLootableSpawn = 25 -- chance out of 100 for a lootable to spawn
+Config.PurgeDistance = 150.0 -- distance for zombies to cleanup
 
 
 
-Config.SpawnRadius = 140.0
-Config.PerPlayerCap = 10
+Config.SpawnRadius = 140.0 -- radius around you that zombies spawn in
+Config.PerPlayerCap = 10 -- the amount of zombies that spawn per player
 
 
-Config.AttackDist = 1.25
+Config.AttackDist = 1.25 -- distance from player when zombies begin to attack
 
 
 Shooting = false
