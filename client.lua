@@ -15,17 +15,31 @@ RegisterNetEvent("zombies:despawnZombie", function(zombie)
 	end
 end)
 local QBCore = exports['qb-core']:GetCoreObject()
-lib.callback.register("zombies:getPlayerStatus", function()
-	if QBCore.Functions.GetPlayerData().citizenid then
-		return true
-	end
-	return false
-end)
 
-lib.callback.register("zombies:getGroundZ", function(x, y, z)
-	local onGround, value = GetGroundZFor_3dCoord(x, y, z, true)
-	return value
-end)
+if Config.Callbacks == "ox" then
+	lib.callback.register("zombies:getPlayerStatus", function()
+		if QBCore.Functions.GetPlayerData().citizenid then
+			return true
+		end
+		return false
+	end)
+
+	lib.callback.register("zombies:getGroundZ", function(x, y, z)
+		local onGround, value = GetGroundZFor_3dCoord(x, y, z, true)
+		return value
+	end)
+elseif Config.Callbacks == "qb" then
+	QBCore.Functions.CreateCallback("zombies:getPlayerStatus", function(source, cb)
+		if QBCore.Functions.GetPlayerData().citizenid then
+			cb(true)
+		end
+		cb(false)
+	end)
+	QBCore.Functions.CreateCallback("zombies:getGroundZ", function(source, cb, x, y, z)
+		local onGround, value = GetGroundZFor_3dCoord(x, y, z, true)
+		cb(value)
+	end)
+end
 
 local DamageQueue = {}
 
@@ -255,26 +269,48 @@ RegisterNetEvent('zombies:syncLootable', function(entity, reward, amount)
             onSelect = function()
 				if not busy then
 					busy = true
-					if lib.progressCircle({
-						label = "Checking Zombie for Loot",
-						duration = 2000,
-						position = "bottom",
-						disable = {
-							move = true,
-							combat = true,
-						},
-						anim = {
-							dict = "random@domestic",
-							clip = "pickup_low",
-							flag = 0,
-						}
-					}) then
-						if reward then
-							local looted = lib.callback.await("zombies:rewardLoot", false, entity, reward, amount)
-						else
-							lib.notify({label = "No loot found", type = "error", duration = 4000, description = "Keep looking!"})
+					if Config.Progressbar == "ox" then
+						if lib.progressCircle({
+							label = "Checking Zombie for Loot",
+							duration = 2000,
+							position = "bottom",
+							disable = {
+								move = true,
+								combat = true,
+							},
+							anim = {
+								dict = "random@domestic",
+								clip = "pickup_low",
+								flag = 0,
+							}
+						}) then
+							if reward then
+								local looted = lib.callback.await("zombies:rewardLoot", false, entity, reward, amount)
+							else
+								lib.notify({label = "No loot found", type = "error", duration = 4000, description = "Keep looking!"})
+							end
+							local delete = lib.callback.await("zombies:deleteZombie", false, entity)
 						end
-						local delete = lib.callback.await("zombies:deleteZombie", false, entity)
+					elseif Config.Progressbar == "qb" then
+						QBCore.Functions.Progressbar('name', 'Checking Zombie for Loot', 2000, false, true, {
+							disableMovement = true,
+							disableCarMovement = true,
+							disableMouse = false,
+							disableCombat = true,
+						}, {
+							animDict = 'random@domestic',
+							anim = 'pickup_low',
+							flags = 0,
+						}, {}, {}, function()
+							if reward then
+								local looted = QBCore.Functions.TriggerCallback("zombies:rewardLoot", entity, reward, amount)
+							else
+								QBCore.Functions.Notify("No loot found", "error")
+							end
+							local delete = QBCore.Functions.TriggerCallback("zombies:deleteZombie", entity)
+						end, function()
+							
+						end)
 					end
 					busy = false
 				end
