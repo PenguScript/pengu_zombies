@@ -3,6 +3,8 @@ Config = {}
 Config.ChanceForLootableSpawn = 25 -- chance out of 100 for a lootable to spawn
 Config.PurgeDistance = 150.0 -- distance for zombies to cleanup
 
+Config.Callbacks = "ox" -- ox or qb
+Config.Progressbar = "ox" -- ox or qb
 
 
 Config.SpawnRadius = 140.0 -- radius around you that zombies spawn in
