@@ -1,5 +1,6 @@
 SpawnedZombies = {}
 Cooldowns = {}
+local QBCore = exports['qb-core']:GetCoreObject()
 
 local function zombieExists(entity, source)
     for i, v in pairs(SpawnedZombies[tostring(source)]) do
