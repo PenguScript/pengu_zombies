@@ -18,7 +18,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 
 if Config.Callbacks == "ox" then
 	lib.callback.register("zombies:getPlayerStatus", function()
-		if QBCore.Functions.GetPlayerData().citizenid then
+		if QBCore.Functions.GetPlayerData() then
 			return true
 		end
 		return false
