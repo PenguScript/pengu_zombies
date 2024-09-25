@@ -30,7 +30,7 @@ if Config.Callbacks == "ox" then
 	end)
 elseif Config.Callbacks == "qb" then
 	QBCore.Functions.CreateCallback("zombies:getPlayerStatus", function(source, cb)
-		if QBCore.Functions.GetPlayerData().citizenid then
+		if QBCore.Functions.GetPlayerData() then
 			cb(true)
 		end
 		cb(false)
