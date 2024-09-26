@@ -131,6 +131,7 @@ Driving = false
 Running = false
 
 local function setWander(v)
+	if IsPedDeadOrDying(v, false) then return end
 	CreateThread(function ()
 		
 		ClearPedTasks(v)
@@ -140,6 +141,7 @@ local function setWander(v)
 		TaskFollowNavMeshToCoord(v, lastCoords.x, lastCoords.y, lastCoords.z, 1.0, -1, 2.0, 1, GetEntityHeading(PlayerPedId()))
 		local lastZombieCoord = vector3(0,0,0)
 		while #(lastCoords-GetEntityCoords(v)) > 5.0 do
+			if IsPedDeadOrDying(v, false) then break end
 			local currentZombieCoord = GetEntityCoords(v)
 			if currentZombieCoord == lastZombieCoord then
 				break
@@ -199,6 +201,10 @@ CreateThread(function()
 	while true do
 		local coords = GetEntityCoords(PlayerPedId())
 		for i,v in pairs(Zombies) do
+			if IsPedDeadOrDying(v, false) then
+				print("Zombie is dead")
+				return
+			end
 			local zombieCoords = GetEntityCoords(v)
 			local dist = #(coords.xyz-zombieCoords.xyz)
 				if dist < Config.AttackDist then
@@ -285,7 +291,7 @@ RegisterNetEvent('zombies:syncLootable', function(entity, reward, amount)
 							if reward then
 								local looted = lib.callback.await("zombies:rewardLoot", false, entity, reward, amount)
 							else
-								lib.notify({label = "No loot found", type = "error", duration = 4000, description = "Keep looking!"})
+								lib.notify({title = "No loot found", type = "error", duration = 4000, description = "Keep looking!"})
 							end
 							local delete = lib.callback.await("zombies:deleteZombie", false, entity)
 						end
