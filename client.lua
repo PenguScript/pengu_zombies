@@ -53,6 +53,7 @@ local function existsInTable(data)
 end
 
 local function DamagePlayer(zombie)
+	if IsEntityDead(zombie) then return false end
 	if not existsInTable(zombie) then
 		local index = #DamageQueue+1
 		DamageQueue[index] = zombie
