@@ -145,7 +145,6 @@ local function setWander(v)
 			end
 			Wait(100)
 		end
-		print('wander')
 
 		TaskWanderInArea(v, lastCoords.x, lastCoords.y, lastCoords.z, 40.0, 2, 1000)		
 	end)
@@ -154,7 +153,6 @@ end
 local function shouldChasePlayer(v, dist)
 	if IsPedDeadOrDying(v, false) then return end
 	local following = GetScriptTaskStatus(v, "SCRIPT_TASK_FOLLOW_TO_OFFSET_OF_ENTITY")
-	print(following)
 	if tostring(following) ~= "1" then
 		if dist < 3.0 and Sneaking then
 			TaskFollowToOffsetOfEntity(v, PlayerPedId(), 0.0,0.0,0.0,1.5, 10.0, 1, true)
@@ -168,7 +166,6 @@ local function shouldChasePlayer(v, dist)
 			TaskFollowToOffsetOfEntity(v, PlayerPedId(), 0.0,0.0,0.0,1.5, 10.0, 1, true)
 		end
 	else
-		print(Shooting)
 		if dist > 140.0 and Shooting then
 			setWander(v)
 		elseif dist > 100.0 and Driving and not Shooting then
