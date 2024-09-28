@@ -17,7 +17,6 @@ local function despawnZombie(zombie)
     TriggerClientEvent("zombies:despawnZombie", -1, NetworkGetNetworkIdFromEntity(zombie))
 end
 
-if Config.Callbacks == "ox" then
     lib.callback.register("zombies:deleteZombie", function(source, entity)
         while NetworkGetEntityFromNetworkId(entity) == 0 do
             Wait(1)
@@ -30,20 +29,6 @@ if Config.Callbacks == "ox" then
             end
         end
     end)
-elseif Config.Callbacks == "qb" then
-    QBCore.Functions.CreateCallback("zombies:deleteZombie", function(source, cb, entity)
-        while NetworkGetEntityFromNetworkId(entity) == 0 do
-            Wait(1)
-        end
-        local svEntity = NetworkGetEntityFromNetworkId(entity)
-        for i,v in pairs(SpawnedZombies[tostring(source)]) do
-            if v == svEntity then
-                table.remove(SpawnedZombies[tostring(source)], i)
-                despawnZombie(svEntity)
-            end
-        end
-    end)
-end
 
 local function spawnZombie(source)
     local ped = GetPlayerPed(source)
@@ -56,13 +41,7 @@ local function spawnZombie(source)
     local offsetY = distance * math.sin(angle)
     
     local groundZ
-    if Config.Callbacks == "ox" then
-        groundZ = lib.callback.await("zombies:getGroundZ", source, coords.x + offsetX, coords.y + offsetY, coords.z)
-    elseif Config.Callbacks == "qb" then
-        QBCore.Functions.TriggerCallback('zombies:getGroundZ', source, function(result)
-            groundZ = result
-        end, coords.x + offsetX, coords.y + offsetY, coords.z)
-    end
+    groundZ = lib.callback.await("zombies:getGroundZ", source, coords.x + offsetX, coords.y + offsetY, coords.z)
     if groundZ == 0.0 then return end
     local spawnCoords = vector3(coords.x + offsetX, coords.y + offsetY, groundZ)
 
@@ -88,48 +67,28 @@ AddEventHandler('onResourceStop', function(resource)
    end
 end)
 
-if Config.Callbacks == "ox" then
-    lib.callback.register("zombies:rewardLoot", function(source, entity, reward, amount)
-        print(entity)
-        while NetworkGetEntityFromNetworkId(entity) == 0 do
-            Wait(1)
-        end
-        local svEntity = NetworkGetEntityFromNetworkId(entity)
+lib.callback.register("zombies:rewardLoot", function(source, entity, reward, amount)
+    print(entity)
+    while NetworkGetEntityFromNetworkId(entity) == 0 do
+        Wait(1)
+    end
+    local svEntity = NetworkGetEntityFromNetworkId(entity)
 
-        local pass, index = zombieExists(entity, source)
-        print(pass)
-        if pass then
-            print('lol')
-            if exports.ox_inventory:CanCarryItem(source, reward, amount) then
-                exports.ox_inventory:AddItem(source, reward, amount)
-                return true
-            else
-                exports.ox_inventory:CustomDrop('Zombie Loot', {
-                    { reward, amount },
-                }, GetEntityCoords(svEntity), 1)
-                return true
-            end
+    local pass, index = zombieExists(entity, source)
+    print(pass)
+    if pass then
+        print('lol')
+        if exports.ox_inventory:CanCarryItem(source, reward, amount) then
+            exports.ox_inventory:AddItem(source, reward, amount)
+            return true
+        else
+            exports.ox_inventory:CustomDrop('Zombie Loot', {
+                { reward, amount },
+            }, GetEntityCoords(svEntity), 1)
+            return true
         end
-    end)
-elseif Config.Callbacks == "qb" then
-    QBCore.Functions.CreateCallback("zombies:rewardLoot", function(source, cb, entity, reward, amount)
-        print(entity)
-        while NetworkGetEntityFromNetworkId(entity) == 0 do
-            Wait(1)
-        end
-        local svEntity = NetworkGetEntityFromNetworkId(entity)
-
-        local pass, index = zombieExists(entity, source)
-        print(pass)
-        if pass then
-            print('lol')
-            if exports['qb-inventory']:CanAddItem(source, reward, amount) then
-                exports['qb-inventory']:AddItem(source, reward, amount)
-                cb(true)
-            end
-        end
-    end)
-end
+    end
+end)
 
 local function selectLootQuality()
     local totalWeight = 0
@@ -256,13 +215,7 @@ CreateThread(function()
             for i,v in pairs(players) do
                 if not SpawnedZombies[v] then SpawnedZombies[v] = {} end
                 local status = false
-                if Config.Callbacks == "ox" then
-                    status = lib.callback.await("zombies:getPlayerStatus", v)
-                elseif Config.Callbacks == "qb" then
-                    QBCore.Functions.TriggerCallback('zombies:getPlayerStatus', v, function(result)
-                        status = result
-                    end)
-                end
+                status = lib.callback.await("zombies:getPlayerStatus", v)
                 if status then
                     if #SpawnedZombies[v] < Config.PerPlayerCap then
                         spawnZombie(v)

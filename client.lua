@@ -16,30 +16,17 @@ RegisterNetEvent("zombies:despawnZombie", function(zombie)
 end)
 local QBCore = exports['qb-core']:GetCoreObject()
 
-if Config.Callbacks == "ox" then
-	lib.callback.register("zombies:getPlayerStatus", function()
-		if QBCore.Functions.GetPlayerData() then
-			return true
-		end
-		return false
-	end)
+lib.callback.register("zombies:getPlayerStatus", function()
+	if QBCore.Functions.GetPlayerData() then
+		return true
+	end
+	return false
+end)
 
-	lib.callback.register("zombies:getGroundZ", function(x, y, z)
-		local onGround, value = GetGroundZFor_3dCoord(x, y, z, true)
-		return value
-	end)
-elseif Config.Callbacks == "qb" then
-	QBCore.Functions.CreateCallback("zombies:getPlayerStatus", function(source, cb)
-		if QBCore.Functions.GetPlayerData() then
-			cb(true)
-		end
-		cb(false)
-	end)
-	QBCore.Functions.CreateCallback("zombies:getGroundZ", function(source, cb, x, y, z)
-		local onGround, value = GetGroundZFor_3dCoord(x, y, z, true)
-		cb(value)
-	end)
-end
+lib.callback.register("zombies:getGroundZ", function(x, y, z)
+	local onGround, value = GetGroundZFor_3dCoord(x, y, z, true)
+	return value
+end)
 
 local DamageQueue = {}
 
@@ -307,11 +294,11 @@ RegisterNetEvent('zombies:syncLootable', function(entity, reward, amount)
 							flags = 0,
 						}, {}, {}, function()
 							if reward then
-								local looted = QBCore.Functions.TriggerCallback("zombies:rewardLoot", entity, reward, amount)
+								local looted = lib.callback.await("zombies:rewardLoot", false, entity, reward, amount)
 							else
 								QBCore.Functions.Notify("No loot found", "error")
 							end
-							local delete = QBCore.Functions.TriggerCallback("zombies:deleteZombie", entity)
+							local delete = lib.callback.await("zombies:deleteZombie", false, entity)
 						end, function()
 							
 						end)
